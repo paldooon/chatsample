@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>firestore test</title>
+  </head>
+  <body>
+    <div id="store_sample">
+      <input id="words" type="text" value=""/>
+      <input type="button" value="送信" onclick="send();"/>
+      <input type="button" value="受信" onclick="recieve();"/>
+      <br/>
+      <div id="output">
+      </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-firestore.js"></script>
+
+    <script>
+
+    let db;
+    let mode = true;
+    function init(){
+      let firebaseConfig = {
+        apiKey: "AIzaSyDUKtC6PdTeJ6p2uVIoWKLg20xPHXMN01U",
+        authDomain: "sampledatabase-aeaf7.firebaseapp.com",
+        projectId: "sampledatabase-aeaf7",
+        storageBucket: "sampledatabase-aeaf7.appspot.com",
+        messagingSenderId: "827242649226",
+        appId: "1:827242649226:web:0da80dea05f2a67e0cbf73"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();              
+    }
+
+    function send()
+    {
+      let word = document.getElementById('words').value;
+      console.log( word );
+
+      let sample = db.collection("sample");
+
+      if ( mode == true ){
+        sample.doc(word).set({ 
+          time: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }else{
+        sample.add({
+          data: word,
+          time: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(function(e) {
+          console.log("success", e);
+        }).catch(function(e) {
+          console.error("error", e);
+        });
+      }
+
+    }
+
+    function recieve()
+    {
+      let output = document.getElementById('output');
+      let sample = db.collection("sample");
+
+      sample.get().then(e => {
+        let arr = [];
+        e.forEach(d => {
+          let dat = d.data();
+          console.log( dat );
+          if ( dat.time != null ){
+            let t = dat.time.toDate();
+            arr.push(t);
+          }
+        });
+        output.innerText = arr.join('：');
+      });
+
+    }
+
+    init();
+
+  </script>
+  </body>
+</html>
